@@ -33,7 +33,7 @@ public class ContrastFilter extends ImageFilter {
 		
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
-				double intensity = histogram[pointIntensity[i][j]-1]++;
+				histogram[pointIntensity[i][j]-1]++;
 			}
 		}
 		
