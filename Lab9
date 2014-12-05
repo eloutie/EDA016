@@ -1,0 +1,80 @@
+package lab8_9;
+import java.awt.Color;
+import se.lth.cs.ptdc.images.ImageFilter;
+
+/** IdentityFilter beskriver en identitetstransformation */
+public class ContrastFilter extends ImageFilter {
+	private short[][] pointIntensity;
+	private int[] histogram;
+	private Color[] grayLevels;
+	
+	/** Skapar ett filterobjekt med namnet name */
+	public ContrastFilter(String name) {
+		super(name);
+		
+		grayLevels = new Color[256];
+		for (int i = 0; i < 256; i++) {
+			grayLevels[i] = new Color(i, i, i);
+		}
+		
+	}
+	
+	/** Filtrerar bilden i matrisen inPixels och returnerar resultatet
+	 * i en ny matris. Utnyttjar eventuellt värdet av paramValue */
+	public Color[][] apply(Color[][] inPixels, double paramValue) {
+		int height = inPixels.length;
+		int width = inPixels[0].length;
+		Color[][] outPixels = new Color[height][width];
+		
+		pointIntensity = computeIntensity(inPixels);
+		histogram = new int[256];
+		
+		double cutOff = paramValue / 100;
+		
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				double intensity = histogram[pointIntensity[i][j]-1]++;
+			}
+		}
+		
+		int lowCut = 0;
+		int highCut = 255;
+		int pixelsCutOff = 0;
+		
+		while (pixelsCutOff < cutOff * height * width) {
+			pixelsCutOff += histogram[lowCut];
+			lowCut++;
+		}
+		pixelsCutOff = 0;
+		while (pixelsCutOff < cutOff * height * width) {
+			pixelsCutOff += histogram[highCut];
+			highCut--;
+		}
+		
+		int newPointIntensity = 0;
+		
+		for (int i = 0; i < height; i++ ) {
+			for (int j = 0; j < width; j++) {
+				if (pointIntensity[i][j] < lowCut) {
+					newPointIntensity = 0;
+				} else if (pointIntensity[i][j] > highCut) {
+					newPointIntensity = 255;
+				} else {
+					newPointIntensity = (255 * (pointIntensity[i][j] - lowCut) / (highCut - lowCut));
+				}
+				outPixels[i][j] = grayLevels[newPointIntensity];
+			}
+		}
+		
+		/** for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				Color pixel = inPixels[i][j];			
+				outPixels[i][j] = new Color(pixel.getRed(), 
+										    pixel.getGreen(),
+										    pixel.getBlue());
+			}
+		} */
+		
+		return outPixels;
+	}
+}
